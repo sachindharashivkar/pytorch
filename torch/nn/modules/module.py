@@ -365,6 +365,26 @@ class Module(object):
             if module is not None:
                 module.state_dict(destination, prefix + name + '.')
         return destination
+    
+    def state_dict_without_buffers(self, destination=None, prefix=''):
+        """Returns a dictionary containing a whole state of the module.
+
+        Both parameters and persistent buffers (e.g. running averages) are
+        included. Keys are corresponding parameter and buffer names.
+
+        Example:
+            >>> module.state_dict().keys()
+            ['bias', 'weight']
+        """
+        if destination is None:
+            destination = OrderedDict()
+        for name, param in self._parameters.items():
+            if param is not None:
+                destination[prefix + name] = param.data
+        for name, module in self._modules.items():
+            if module is not None:
+                module.state_dict_without_buffers(destination, prefix + name + '.')
+        return destination
 
     def load_state_dict(self, state_dict):
         """Copies parameters and buffers from :attr:`state_dict` into
